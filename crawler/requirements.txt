@@ -1,0 +1,9 @@
+jupyter
+Scrapy
+selenium
+pymysql
+pandas
+konlpy
+tensorflow
+tensorflow-datasets
+schedule
