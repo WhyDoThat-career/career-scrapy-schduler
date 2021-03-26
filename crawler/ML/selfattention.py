@@ -162,7 +162,7 @@ class AttentionModel :
         pred = self.model.predict(self.proc_eval(sentence))
         return list(labels['label'])[np.argmax(pred)]
 
-    def get_model(self,model_path='ML/best_test.h5') :
+    def get_model(self,model_path='ML/sector_classifier.h5') :
         embedding_dim = 64  # Embedding size for each token
         num_heads = 8  # Number of attention heads
         dff = 512  # Hidden layer size in feed forward network inside transformer

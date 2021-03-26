@@ -12,6 +12,8 @@ class RoketpunchSpider(scrapy.Spider):
     start_time = None
     classifier = AttentionModel()
     stop_toggle = False
+    last_page_number = 0
+    page_number = 1
 
     def table2dict(self,labels,contents) :
         table_dict = dict()
@@ -38,14 +40,10 @@ class RoketpunchSpider(scrapy.Spider):
     def parse_main_page(self, response):
         # print(response.text)
         print('-'*10,'크롤링 결과','-'*10)
-        last_page_number = int(response.css('#search-results > div.ui.blank.right.floated.segment > div > div.tablet.computer.large.screen.widescreen.only > a:nth-child(7)::text').getall()[0])
-        print(last_page_number)
+        self.last_page_number = int(response.css('#search-results > div.ui.blank.right.floated.segment > div > div.tablet.computer.large.screen.widescreen.only > a:nth-child(7)::text').getall()[0])
+        print(self.last_page_number)
         print('-'*33)
-        for page_number in range(1,last_page_number+1) :
-            if self.stop_toggle :
-                break
-            else :
-                yield scrapy.Request(url =self.main_url+f'/jobs?job=1&page={page_number}',callback=self.parse_number_page)
+        yield scrapy.Request(url =self.main_url+f'/jobs?job=1&page={self.page_number}',callback=self.parse_number_page)
 
     def parse_number_page(self, response) :
         job_cards = response.css('#company-list > div > div.content').getall()
@@ -68,8 +66,9 @@ class RoketpunchSpider(scrapy.Spider):
                                                 'job_card_company':job_card_company,
                                                 'job_card_href':self.main_url+job_card_href,
                                                 'logo_image' : image})
-            if self.stop_toggle :
-                break
+        self.page_number += 1
+        if self.page_number <= self.last_page_number and not self.stop_toggle :
+            yield scrapy.Request(url =self.main_url+f'/jobs?job=1&page={self.page_number}',callback=self.parse_number_page)
 
             
     def parse_job_detail(self, response) :

@@ -31,8 +31,8 @@ class MySQL :
     def check_data(self,table,href) :
         db = self.conn_mysqldb()
         db_cursor = db.cursor()
-        sql_query = f"SELECT * FROM {table} WHERE href = {href}"
-        db.cursor.execute(sql_query)
+        sql_query = f"SELECT * FROM {table} WHERE href = \'{href}\'"
+        db_cursor.execute(sql_query)
         result = db_cursor.fetchone()
         if not result :
             return False

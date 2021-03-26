@@ -11,20 +11,18 @@ class KakaoSpider(scrapy.Spider):
     start_time = None
     classifier = AttentionModel()
     stop_toggle = False
+    last_page_number = 0
+    page_number = 1
 
     def start_requests(self):
         yield scrapy.Request(url=self.main_url+'/jobs?page=1',callback=self.parse_main_page)
         
     def parse_main_page(self, response):
         print('-'*10,'마지막 페이지 번호','-'*10)
-        last_page_number = int(response.css('#mArticle > div > div.paging_list > span > a::text').getall()[-1])
-        print(last_page_number)
+        self.last_page_number = int(response.css('#mArticle > div > div.paging_list > span > a::text').getall()[-1])
+        print(self.last_page_number)
         print('-'*33)
-        for page_number in range(1,last_page_number+1) :
-            if self.stop_toggle :
-                break
-            else :
-                yield scrapy.Request(url =self.main_url+f'/jobs?page={page_number}',callback=self.parse_number_page)
+        yield scrapy.Request(url =self.main_url+f'/jobs?page={self.page_number}',callback=self.parse_number_page, dont_filter=True)
 
     def parse_number_page(self, response) :
         job_card_titles = response.css('#mArticle > div > ul.list_jobs > li > div > div > a > h4::text').getall()
@@ -32,6 +30,7 @@ class KakaoSpider(scrapy.Spider):
         job_card_hrefs = response.css('#mArticle > div > ul.list_jobs > li > div > div > a::attr(href)').getall()
         
         for index,job_card_href in enumerate(job_card_hrefs) :
+            job_card_href = job_card_href.split('?')[0]
             check_overlap = sql_db.check_data('job_detail',self.main_url+job_card_href)
             if check_overlap :
                 self.stop_toggle = True
@@ -42,6 +41,9 @@ class KakaoSpider(scrapy.Spider):
                                     meta={'job_card_title':job_card_titles[index],
                                         'job_card_company':remove_blank_all(job_card_companys[index]),
                                         'job_card_href':self.main_url+job_card_href})
+        self.page_number += 1
+        if self.page_number <= self.last_page_number and not self.stop_toggle :
+            yield scrapy.Request(url =self.main_url+f'/jobs?page={self.page_number}',callback=self.parse_number_page, dont_filter=True)
 
     def parse_detail(self, response) :
         doc = CrawlerItem()

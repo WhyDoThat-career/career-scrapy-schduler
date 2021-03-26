@@ -12,6 +12,8 @@ class ProgrammersSpider(scrapy.Spider):
     start_time = None
     classifier = AttentionModel()
     stop_toggle = False
+    last_page_number = 0
+    page_number = 1
     
     def table2dict(self,labels,contents) :
         table_dict = dict()
@@ -42,16 +44,12 @@ class ProgrammersSpider(scrapy.Spider):
         
     def parse_main_page(self, response):
         print('-'*10,'마지막 페이지 번호','-'*10)
-        last_page_number = int(response.css('#paginate > nav > ul > li:nth-child(8) > a::text').getall()[0])
-        print(last_page_number)
+        self.last_page_number = int(response.css('#paginate > nav > ul > li:nth-child(8) > a::text').getall()[0])
+        print(self.last_page_number)
         print('-'*33)
         #paginate > nav > ul > li:nth-child(8) > a
-        for page_number in range(1,last_page_number+1) :
-            if self.stop_toggle :
-                break
-            else :
-                yield scrapy.Request(url =self.main_url+f'/job?_=1610273854107&job_position%5Bdummy%5D=0&order=recent&page={page_number}',
-                                 callback=self.parse_number_page)
+        yield scrapy.Request(url =self.main_url+f'/job?_=1610273854107&job_position%5Bdummy%5D=0&order=recent&page={self.page_number}',
+                            callback=self.parse_number_page)
             # break
     def parse_number_page(self, response) :
         job_card_titles = response.css('#list-positions-wrapper > ul > li > div.item-body > h5 > a::text').getall()
@@ -69,7 +67,11 @@ class ProgrammersSpider(scrapy.Spider):
                                  meta={'job_card_title':job_card_titles[index],
                                        'job_card_company':remove_blank_all(job_card_companys[index]),
                                        'job_card_href':self.main_url+job_card_href})
-            # break
+        self.page_number += 1
+        if self.page_number <= self.last_page_number and not self.stop_toggle:
+            yield scrapy.Request(url =self.main_url+f'/job?_=1610273854107&job_position%5Bdummy%5D=0&order=recent&page={self.page_number}',
+                            callback=self.parse_number_page)
+                            
     def parse_detail(self, response) :
         doc = CrawlerItem()
         print(response.meta['job_card_title'],response.meta['job_card_company'])

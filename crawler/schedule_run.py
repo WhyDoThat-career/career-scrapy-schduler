@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 import schedule
 import scrapy
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 from crawler.spiders.programmers import ProgrammersSpider
@@ -35,28 +35,34 @@ def start_spider():
             'crawler.pipelines.CrawlerPipeline': 300
         }
     }
-    def crawler_func(spider):
+    def crawler_func():
         configure_logging()
         runner = CrawlerRunner(custom_settings)
-        runner.crawl(spider)
-        d = runner.join()
-        d.addBoth(lambda _: reactor.stop())
 
+        @defer.inlineCallbacks
+        def crawl() :
+            yield runner.crawl(KakaoSpider)
+            yield runner.crawl(NaverSpider)
+            yield runner.crawl(ProgrammersSpider)
+            yield runner.crawl(RoketpunchSpider)
+            yield runner.crawl(WantedSpider)
+            reactor.stop()
+        crawl()
         reactor.run() 
-
-start = start_spider()
+    crawler_func()
 
 @print_elapsed_time
 def job_every_day_crawl() :
-    start(KakaoSpider)
-    start(NaverSpider)
-    start(ProgrammersSpider)
-    start(RoketpunchSpider)
-    start(WantedSpider)
+    start_spider()
 
 @print_elapsed_time
 def job_remove_at_database() :
     pass
 
-schedule.every().day.at("14:00").do(job_every_day_crawl)
+schedule.every().day.at("15:02").do(job_every_day_crawl)
 schedule.every().day.at("23:00").do(job_remove_at_database)
+
+# job_every_day_crawl()
+while True:
+    schedule.run_pending()
+    time.sleep(1)

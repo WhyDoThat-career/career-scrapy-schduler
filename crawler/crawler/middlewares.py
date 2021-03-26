@@ -42,7 +42,7 @@ class SeleniumMiddleware:
         
     def infinite_scroll_control(self) :
         last_height = self.driver.execute_script("return document.body.scrollHeight")
-        while True :
+        for i in range(10) :
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(2)
             new_height = self.driver.execute_script("return document.body.scrollHeight")
@@ -75,7 +75,7 @@ class SeleniumMiddleware:
         else :
             time.sleep(1.2)
         if spider.name == 'wanted' and request.meta == {}:
-            pass#self.infinite_scroll_control()
+            self.infinite_scroll_control()
         elif spider.name == 'roketpunch' and 'job_card_company' in request.meta :
             self.see_more_button_click()
         elif spider.name == 'naver' and request.meta == {} :
