@@ -10,5 +10,6 @@
     "salary_average"  : "int",
     "interview_count"  : "int",
     "interview_level"  : "string",
-    "interview_feel"  : "string"
+    "interview_feel"  : "string",
+    "crawl_date" : "string"
 }

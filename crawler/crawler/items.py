@@ -45,3 +45,4 @@ class JobplanetItem(scrapy.Item) :
     interview_count = scrapy.Field()
     interview_level = scrapy.Field()
     interview_feel = scrapy.Field()
+    crawl_date = scrapy.Field()
