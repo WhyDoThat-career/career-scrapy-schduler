@@ -51,6 +51,28 @@ def start_spider():
         reactor.run() 
     crawler_func()
 
+def start_jobplanet():
+    custom_settings= {
+        'DOWNLOADER_MIDDLEWARES': { 
+            'crawler.middlewares.SeleniumMiddleware': 100, 
+        },
+
+        'ITEM_PIPELINES' : {
+            'crawler.pipelines.JobPlanetPipeline': 300
+        }
+    }
+    def crawler_func():
+        configure_logging()
+        runner = CrawlerRunner(custom_settings)
+
+        @defer.inlineCallbacks
+        def crawl() :
+            yield runner.crawl(JobplanetSpider)
+            reactor.stop()
+        crawl()
+        reactor.run() 
+    crawler_func()
+
 @print_elapsed_time
 def job_every_day_crawl() :
     start_spider()
@@ -59,8 +81,13 @@ def job_every_day_crawl() :
 def job_remove_at_database() :
     pass
 
+@print_elapsed_time
+def job_every_month_crawl() :
+    start_jobplanet()
+
 schedule.every().day.at("15:02").do(job_every_day_crawl)
 schedule.every().day.at("23:00").do(job_remove_at_database)
+schedule.every().week.at("2").do(job_every_month_crawl)
 
 # job_every_day_crawl()
 while True:

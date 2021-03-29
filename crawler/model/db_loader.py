@@ -38,6 +38,13 @@ class MySQL :
             return False
         else :
             return True
+    def get_distinct_data(self,table,key) :
+        db = self.conn_mysqldb()
+        db_cursor = db.cursor()
+        sql_query = f"SELECT DISTINCT {key} FROM {table}"
+        db_cursor.execute(sql_query)
+        result = db_cursor.fetchall()
+        return [item[0] for item in result]
 
 if __name__ == '__main__':
 

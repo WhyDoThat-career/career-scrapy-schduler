@@ -1,0 +1,14 @@
+{
+    "name" : "string",
+    "sector"       : "string",
+    "scale"        : "string",
+    "employees"    : "string",
+    "establishment_date"  : "datetime",
+    "review_count"  : "int",
+    "star_point"   : "float",
+    "salary_count"  : "int",
+    "salary_average"  : "int",
+    "interview_count"  : "int",
+    "interview_level"  : "string",
+    "interview_feel"  : "string"
+}
