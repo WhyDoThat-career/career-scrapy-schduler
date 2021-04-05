@@ -87,7 +87,7 @@ def job_every_month_crawl() :
 
 schedule.every().day.at("15:02").do(job_every_day_crawl)
 schedule.every().day.at("23:00").do(job_remove_at_database)
-schedule.every().week.at("2").do(job_every_month_crawl)
+# schedule.every().week.at("2").do(job_every_month_crawl)
 
 # job_every_day_crawl()
 while True:

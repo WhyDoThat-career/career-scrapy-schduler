@@ -98,4 +98,4 @@ class JobPlanetPipeline:
         '''
         send_mail(email_postman,f'{datetime.date.today()} {spider.name} 크롤링 보고서',
                 f'Summary stats from {spider.name} crawler:\n\n{report}',
-                ['jgy206@gmail.com'])#,'endndnjs2@gmail.com','kth9193@gmail.com'])
+                ['jgy206@gmail.com','endndnjs2@gmail.com','kth9193@gmail.com'])

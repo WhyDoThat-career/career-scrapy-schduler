@@ -86,5 +86,5 @@ def job_remove_at_database() :
 def job_every_month_crawl() :
     start_jobplanet()
 
-# job_every_day_crawl()
-job_every_month_crawl()
+job_every_day_crawl()
+# job_every_month_crawl()
