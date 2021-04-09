@@ -1,8 +1,8 @@
 import scrapy
 from crawler.items import CrawlerItem
-from crawler.data_controller import style_image_parse,control_deadline
+from crawler.data_controller import style_image_parse,control_deadline,arr2str
 from datetime import datetime
-from ML.selfattention import AttentionModel
+from ML.selfattention import AttentionModel,converter
 from crawler import sql_db
 
 class WantedSpider(scrapy.Spider):
@@ -43,7 +43,28 @@ class WantedSpider(scrapy.Spider):
                                     > div._33u5kCnL62igIXfrIg7Ikl > div._31EtVNPZ-KwYCXvVZ3927g > section._3XP3DBqOgzsz7P6KrVpbGO > div:nth-child(2) > span.body::text').get()
         image = response.css('#__next > div > div._37L2cip40tqu3zm3KC4dAa > div._17tolBMfrAeoPmo6I9pA1P > div._1FVm15xN253istI2zLF_Ax \
                                 > div > section._3h_f6TfissC0l7ogPcn7lY > button.left > div.logo::attr(style)').getall()
-
+        
+        main_work = response.css('#__next > div > div._37L2cip40tqu3zm3KC4dAa > div._17tolBMfrAeoPmo6I9pA1P > div._1FVm15xN253istI2zLF_Ax\
+                                > div._33u5kCnL62igIXfrIg7Ikl > div._31EtVNPZ-KwYCXvVZ3927g > section._3_gsSnQyvwrqCAjw47hjWK\
+                                > p:nth-child(3)::text').getall
+        
+        require = response.css('#__next > div > div._37L2cip40tqu3zm3KC4dAa > div._17tolBMfrAeoPmo6I9pA1P > div._1FVm15xN253istI2zLF_Ax\
+                                > div._33u5kCnL62igIXfrIg7Ikl > div._31EtVNPZ-KwYCXvVZ3927g > section._3_gsSnQyvwrqCAjw47hjWK \
+                                > p:nth-child(5) > span::text').getall()
+        good = response.css('#__next > div > div._37L2cip40tqu3zm3KC4dAa > div._17tolBMfrAeoPmo6I9pA1P > div._1FVm15xN253istI2zLF_Ax\
+                             > div._33u5kCnL62igIXfrIg7Ikl > div._31EtVNPZ-KwYCXvVZ3927g > section._3_gsSnQyvwrqCAjw47hjWK\
+                             > p:nth-child(7) > span::text').getall()
+        
+        sentence = arr2str(main_work+require+good)
+        okt_title = converter.pos(sentence)
+        sentence = ','.join([tup[0].upper() for tup in okt_title if tup[1] == 'Alpha'])
+        sentence = (sentence
+                    .replace('NODE','NODE.JS')
+                    .replace('VUE','VUE.JS')
+                    .replace('JS','JAVASCRIPT')
+                    .replace('NATIVE','REACT-NATIVE')
+                    )
+        
         doc['platform'] = self.name
 
         doc['logo_image'] = style_image_parse(image)[0]
@@ -52,7 +73,7 @@ class WantedSpider(scrapy.Spider):
         
         doc['main_text'] = ''.join(detail_main_text).replace("\'",'＇')
         doc['salary'] = None
-        doc['skill_tag'] = None
+        doc['skill_tag'] = sentence
         doc['sector'] = self.classifier.predict(response.meta['job_card_title'])
         doc['newbie'] = 1
         doc['career'] = '무관'
