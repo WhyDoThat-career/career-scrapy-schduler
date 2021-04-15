@@ -46,7 +46,7 @@ class WantedSpider(scrapy.Spider):
         
         main_work = response.css('#__next > div > div._37L2cip40tqu3zm3KC4dAa > div._17tolBMfrAeoPmo6I9pA1P > div._1FVm15xN253istI2zLF_Ax\
                                 > div._33u5kCnL62igIXfrIg7Ikl > div._31EtVNPZ-KwYCXvVZ3927g > section._3_gsSnQyvwrqCAjw47hjWK\
-                                > p:nth-child(3)::text').getall
+                                > p:nth-child(3)::text').getall()
         
         require = response.css('#__next > div > div._37L2cip40tqu3zm3KC4dAa > div._17tolBMfrAeoPmo6I9pA1P > div._1FVm15xN253istI2zLF_Ax\
                                 > div._33u5kCnL62igIXfrIg7Ikl > div._31EtVNPZ-KwYCXvVZ3927g > section._3_gsSnQyvwrqCAjw47hjWK \
@@ -58,12 +58,15 @@ class WantedSpider(scrapy.Spider):
         sentence = arr2str(main_work+require+good)
         okt_title = converter.pos(sentence)
         sentence = ','.join([tup[0].upper() for tup in okt_title if tup[1] == 'Alpha'])
-        sentence = (sentence
+        sentence = arr2str(set(sentence
+                    .replace('JS','JAVASCRIPT')
                     .replace('NODE','NODE.JS')
                     .replace('VUE','VUE.JS')
-                    .replace('JS','JAVASCRIPT')
+                    .replace('JAVASCRIPTP','JSP')
                     .replace('NATIVE','REACT-NATIVE')
-                    )
+                    .split(',')
+                    ))
+        
         
         doc['platform'] = self.name
 
