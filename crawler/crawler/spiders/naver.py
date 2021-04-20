@@ -38,7 +38,7 @@ class NaverSpider(scrapy.Spider):
         print(len(job_card_titles),len(logo_image),len(job_card_hrefs),len(detail_deadlines))
 
         for index,detail_deadline in enumerate(detail_deadlines) :
-            check_overlap = sql_db.check_data('job_detail',self.main_url+job_card_hrefs[index])
+            check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_hrefs[index])
             if check_overlap :
                 self.stop_toggle = True
                 break

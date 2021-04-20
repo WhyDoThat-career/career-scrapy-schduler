@@ -31,13 +31,20 @@ class MySQL :
     def check_data(self,table,href) :
         db = self.conn_mysqldb()
         db_cursor = db.cursor()
-        sql_query = f"SELECT * FROM {table} WHERE href = \'{href}\'"
+        sql_query = f"SELECT id,title,company_name FROM {table} WHERE href = \'{href}\'"
         db_cursor.execute(sql_query)
         result = db_cursor.fetchone()
+        print(result)
         if not result :
-            return False
+            return False,False
         else :
-            return True
+            result_dict = dict()
+            result_dict['id'] = result[0]
+            result_dict['title'] = result[1]
+            result_dict['company_name'] = result[2]
+            result_dict['platform'] = result[3]
+            return True,result_dict
+        
     def get_distinct_data(self,table,key) :
         db = self.conn_mysqldb()
         db_cursor = db.cursor()

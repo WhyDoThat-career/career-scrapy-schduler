@@ -55,7 +55,7 @@ class RoketpunchSpider(scrapy.Spider):
             image = Selector(text=images[index]).css('a > div > img::attr(src)').get()
             
             for index,job_card_href in enumerate(job_card_hrefs) :
-                check_overlap = sql_db.check_data('job_detail',self.main_url+job_card_href)
+                check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_href)
                 if check_overlap :
                     self.stop_toggle = True
                     break

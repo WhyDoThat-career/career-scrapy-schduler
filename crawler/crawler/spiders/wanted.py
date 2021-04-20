@@ -22,7 +22,7 @@ class WantedSpider(scrapy.Spider):
         job_card_hrefs = response.css('#__next > div > div._1yHloYOs_bDD0E-s121Oaa > div._2y4sIVmvSrf6Iy63okz9Qh > div > ul > li > div > a::attr(href)').getall()
 
         for index,job_card_href in enumerate(job_card_hrefs) :
-            check_overlap = sql_db.check_data('job_detail',self.main_url+job_card_href)
+            check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_href)
             if check_overlap :
                 self.stop_toggle = True
                 break

@@ -21,6 +21,7 @@ class ProgrammersSpider(scrapy.Spider):
             del contents[labels.index('주요 서비스')]
         for index,key in enumerate(labels) :
             if key == '경력' :
+                print(contents[index])
                 if contents[index] in ['신입','경력 무관'] or contents[index].split(' ~ ')[0] == '0' :
                     table_dict['신입여부'] = 1
                     table_dict['경력여부'] = '무관'
@@ -57,7 +58,7 @@ class ProgrammersSpider(scrapy.Spider):
         job_card_hrefs = response.css('#list-positions-wrapper > ul > li > div.item-body > h5 > a::attr(href)').getall()
         
         for index,job_card_href in enumerate(job_card_hrefs) :
-            check_overlap = sql_db.check_data('job_detail',self.main_url+job_card_href)
+            check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_href)
             if check_overlap :
                 self.stop_toggle = True
                 break
@@ -76,26 +77,26 @@ class ProgrammersSpider(scrapy.Spider):
         doc = CrawlerItem()
         print(response.meta['job_card_title'],response.meta['job_card_company'])
         if response.meta['job_card_company'] == '' :
-            response.meta['job_card_company'] = response.css('body > div.main > div.position-show > div > header > div.header-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 > h4:nth-child(2)::text').get()
+            response.meta['job_card_company'] = response.css('#app > div > div > header > div.header-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 > h4:nth-child(2)::text').get()
 
-        detail_tag = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
+        detail_tag = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
                                     > section.section-stacks > table > tbody > tr > td > code::text').getall()
-        detail_position = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
+        detail_position = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
                                     > section.section-position ').getall()
-        detail_requirements = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8\
+        detail_requirements = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8\
                                     > section.section-requirements ').getall()
-        detail_preference = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
+        detail_preference = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
                                     > section.section-preference ').getall()
-        detail_description = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8\
+        detail_description = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8\
                                     > section.section-description ').getall()
         
         
-        table_label = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
+        table_label = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
                                     > section.section-summary > table > tbody > tr > td.t-label::text').getall() 
-        table_text = response.css('body > div.main > div.position-show > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
+        table_text = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8\
                                     > section.section-summary > table > tbody > tr > td.t-content::text').getall()
         
-        image = response.css('body > div.main > div.position-show > div > div > div.content-side.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-4\
+        image = response.css('#app > div > div > div > div.content-side.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-4\
                                 > section:nth-child(2) > a > img::attr(src)').get()
         
         table_dict = self.table2dict(table_label,table_text)
