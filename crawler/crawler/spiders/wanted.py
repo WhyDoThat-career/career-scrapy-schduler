@@ -1,6 +1,6 @@
 import scrapy
 from crawler.items import CrawlerItem
-from crawler.data_controller import style_image_parse,control_deadline,arr2str
+from crawler.data_controller import remove_blank_all,style_image_parse,control_deadline,arr2str
 from datetime import datetime
 from ML.selfattention import AttentionModel,converter
 from crawler import sql_db
@@ -24,12 +24,24 @@ class WantedSpider(scrapy.Spider):
         for index,job_card_href in enumerate(job_card_hrefs) :
             check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_href)
             if check_overlap :
-                self.stop_toggle = True
-                break
+                if (result['title'] != job_card_titles[index] 
+                    or result['company_name'] != job_card_companys[index]):
+                    sql_db.insert_center(result.keys(),result.values())
+                    sql_db.delete_data('job_detail',result['id'])
+                    yield scrapy.Request(url=self.main_url+job_card_href,
+                                        callback=self.parse_job_detail,
+                                        meta={'job_card_title':job_card_titles[index],
+                                            'job_card_company':remove_blank_all(job_card_companys[index]),
+                                            'job_card_href':self.main_url+job_card_href})
+                else :
+                    self.stop_toggle = True
+                    break
             else :
-                yield scrapy.Request(url=self.main_url+job_card_href,callback=self.parse_job_detail,meta={'job_card_title':job_card_titles[index],
-                                                                                                  'job_card_company':job_card_companys[index],
-                                                                                                  'job_card_href':self.main_url+job_card_href})
+                yield scrapy.Request(url=self.main_url+job_card_href,
+                                        callback=self.parse_job_detail,
+                                        meta={'job_card_title':job_card_titles[index],
+                                            'job_card_company':remove_blank_all(job_card_companys[index]),
+                                            'job_card_href':self.main_url+job_card_href})
 
     def parse_job_detail(self, response):
         doc = CrawlerItem()

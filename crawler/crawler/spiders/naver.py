@@ -40,13 +40,25 @@ class NaverSpider(scrapy.Spider):
         for index,detail_deadline in enumerate(detail_deadlines) :
             check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_hrefs[index])
             if check_overlap :
-                self.stop_toggle = True
-                break
+                if (result['title'] != job_card_titles[index]):
+                    sql_db.insert_center(result.keys(),result.values())
+                    sql_db.delete_data('job_detail',result['id'])
+                    yield scrapy.Request(url=self.main_url+job_card_hrefs[index],
+                                    callback=self.parse_job_detail,
+                                    meta={'job_card_title':job_card_titles[index],
+                                        'logo_image':self.main_url+'/'+logo_image[index],
+                                        'job_card_href':self.main_url+job_card_hrefs[index],
+                                        'detail_deadline':detail_deadline})
+                else :
+                    self.stop_toggle = True
+                    break
             else :
-                yield scrapy.Request(url=self.main_url+job_card_hrefs[index],callback=self.parse_job_detail,meta={'job_card_title':job_card_titles[index],
-                                                                                                  'logo_image':self.main_url+'/'+logo_image[index],
-                                                                                                  'job_card_href':self.main_url+job_card_hrefs[index],
-                                                                                                  'detail_deadline':detail_deadline})
+                yield scrapy.Request(url=self.main_url+job_card_hrefs[index],
+                                    callback=self.parse_job_detail,
+                                    meta={'job_card_title':job_card_titles[index],
+                                        'logo_image':self.main_url+'/'+logo_image[index],
+                                        'job_card_href':self.main_url+job_card_hrefs[index],
+                                        'detail_deadline':detail_deadline})
 
     def parse_job_detail(self, response):
         doc = CrawlerItem()

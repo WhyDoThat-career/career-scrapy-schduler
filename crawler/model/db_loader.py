@@ -1,5 +1,7 @@
 import pymysql
 import json
+import pandas
+from pymysql.cursors import DictCursor
 
 class MySQL :
     def __init__(self,key_file,database) :
@@ -11,6 +13,13 @@ class MySQL :
                                 passwd=KEY['password'],
                                 db=database,
                                 charset='utf8mb4')
+        self.data_center = pymysql.connect(
+                                host = '15.164.140.140',
+                                user = KEY['user'],
+                                passwd = KEY['password'],
+                                db = 'career-center',
+                                charset='utf8mb4'
+                                )
     
     def load_key(self,key_file) :
         with open(key_file) as key_file :
@@ -20,17 +29,36 @@ class MySQL :
         if not self.MYSQL_CONN.open :
             self.MYSQL_CONN.ping(reconnect=True)
         return self.MYSQL_CONN
-    
+    def conn_data_center(self) :
+        if not self.data_center.open :
+            self.data_center.ping(reconnect=True)
+        return self.data_center
     def insert_data(self,table,key,data) :
         db = self.conn_mysqldb()
         db_cursor = db.cursor()
         sql_query = f"INSERT INTO {table} ({key})  VALUES ({data})"
         db_cursor.execute(sql_query)
         db.commit()
+    def insert_center(self,key,data) :
+        skey = ','.join(key)
+        sdata = ','.join(data)
+        db = self.conn_data_center()
+        db_cursor = db.cursor()
+        sql_query = f"INSERT INTO regacy_job_detail\
+                         ({key})  VALUES ({data})"
+        db_cursor.execute(sql_query)
+        db.commit()
+
+    def delete_data(self,table,id) :
+        db = self.conn_mysqldb()
+        db_cursor = db.cursor()
+        sql_query = f"DELETE FROM {table} WHERE `id` = {id}"
+        db_cursor.execute(sql_query)
+        db.commit()
 
     def check_data(self,table,href) :
         db = self.conn_mysqldb()
-        db_cursor = db.cursor()
+        db_cursor = db.cursor(DictCursor)
         sql_query = f"SELECT id,title,company_name FROM {table} WHERE href = \'{href}\'"
         db_cursor.execute(sql_query)
         result = db_cursor.fetchone()
@@ -38,12 +66,7 @@ class MySQL :
         if not result :
             return False,False
         else :
-            result_dict = dict()
-            result_dict['id'] = result[0]
-            result_dict['title'] = result[1]
-            result_dict['company_name'] = result[2]
-            result_dict['platform'] = result[3]
-            return True,result_dict
+            return True,result
         
     def get_distinct_data(self,table,key) :
         db = self.conn_mysqldb()
