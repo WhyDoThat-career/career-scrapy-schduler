@@ -1,4 +1,5 @@
 {
+    "id" : "int",
     "name" : "string",
     "sector"       : "string",
     "scale"        : "string",

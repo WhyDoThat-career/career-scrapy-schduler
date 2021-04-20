@@ -1,7 +1,7 @@
 import scrapy
 from crawler.items import CrawlerItem
 from crawler.data_controller import remove_blank_all,wave_split,arr2str,control_deadline_programmers,remove_xa0
-from datetime import datetime
+from datetime import datetime,timedelta
 from ML.selfattention import AttentionModel
 import time
 from crawler import sql_db
@@ -19,6 +19,8 @@ class ProgrammersSpider(scrapy.Spider):
         table_dict = dict()
         if '주요 서비스' in labels and remove_blank_all(contents[labels.index('주요 서비스')]) == '' :
             del contents[labels.index('주요 서비스')]
+        if len(labels) != len(contents) :
+            del labels[labels.index('주요 서비스')]
         for index,key in enumerate(labels) :
             if key == '경력' :
                 print(contents[index])
@@ -60,9 +62,9 @@ class ProgrammersSpider(scrapy.Spider):
         for index,job_card_href in enumerate(job_card_hrefs) :
             check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_href)
             if check_overlap :
-                if (result['title'] != job_card_titles[index] 
-                    or result['company_name'] != job_card_companys[index]):
-                    sql_db.insert_center(result.keys(),result.values())
+                if ((result['title'] != job_card_titles[index] or result['company_name'] != remove_blank_all(job_card_companys[index]))
+                    or (datetime.today()-result['crawl_date']) >= timedelta(days=14)) :
+                    sql_db.insert_center(result)
                     sql_db.delete_data('job_detail',result['id'])
                     yield scrapy.Request(url=self.main_url+job_card_href,
                                  callback=self.parse_detail,
@@ -105,7 +107,6 @@ class ProgrammersSpider(scrapy.Spider):
                                     > section.section-summary > table > tbody > tr > td.t-label::text').getall() 
         table_text = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8\
                                     > section.section-summary > table > tbody > tr > td.t-content::text').getall()
-        
         image = response.css('#app > div > div > div > div.content-side.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-4\
                                 > section:nth-child(2) > a > img::attr(src)').get()
         

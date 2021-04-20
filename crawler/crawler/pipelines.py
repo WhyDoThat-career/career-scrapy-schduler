@@ -19,23 +19,9 @@ with open('model/dtype_company.json') as file :
     dtype_company = json.load(file)
 
 class CrawlerPipeline:
-    def create_sql_item(self,item,dtype) :
-        if dtype == 'string' or 'datetime':
-            return "'{}'".format(item)
-        elif dtype == 'bool' or 'int':
-            return "{}".format(item)
-            
     def process_item(self, items, spider):
         print('@'*10,'pipeline','@'*10)
-        key_arr = []
-        item_arr = []
-        # print(items)
-        for key, item in items.items() :
-            if item != None :
-                key_arr.append(key)
-                item_arr.append(self.create_sql_item(item,dtype=dtype_map[key]))
-        
-        sql_db.insert_data('job_detail',arr2str(key_arr),arr2str(item_arr))
+        sql_db.insert_data('job_detail',items,dtype_map)
         print('[Success]insert data for mysql')
         return items
 
@@ -68,15 +54,7 @@ class JobPlanetPipeline:
             
     def process_item(self, items, spider):
         print('@'*10,'pipeline','@'*10)
-        key_arr = []
-        item_arr = []
-        # print(items)
-        for key, item in items.items() :
-            if item != None :
-                key_arr.append(key)
-                item_arr.append(self.create_sql_item(item,dtype=dtype_company[key]))
-        
-        sql_db.insert_data('company_info',arr2str(key_arr),arr2str(item_arr))
+        sql_db.insert_data('company_info',items,dtype_company)
         print('[Success]insert data for mysql')
         return items
 

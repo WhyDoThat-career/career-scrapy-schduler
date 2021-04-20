@@ -1,7 +1,7 @@
 import scrapy
 from crawler.items import CrawlerItem
 from crawler.data_controller import style_image_parse,control_deadline_naver,control_skill_tag_naver
-from datetime import datetime
+from datetime import datetime,timedelta
 from ML.selfattention import AttentionModel
 from crawler import sql_db
 
@@ -40,8 +40,8 @@ class NaverSpider(scrapy.Spider):
         for index,detail_deadline in enumerate(detail_deadlines) :
             check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_hrefs[index])
             if check_overlap :
-                if (result['title'] != job_card_titles[index]):
-                    sql_db.insert_center(result.keys(),result.values())
+                if (result['title'] != job_card_titles[index]) :
+                    sql_db.insert_center(result)
                     sql_db.delete_data('job_detail',result['id'])
                     yield scrapy.Request(url=self.main_url+job_card_hrefs[index],
                                     callback=self.parse_job_detail,

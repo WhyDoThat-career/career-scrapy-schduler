@@ -2,7 +2,7 @@ import scrapy
 from scrapy.selector import Selector
 from crawler.items import CrawlerItem
 from crawler.data_controller import remove_blank_all,wave_split,arr2str
-from datetime import datetime
+from datetime import datetime,timedelta
 from ML.selfattention import AttentionModel
 from crawler import sql_db
 
@@ -57,9 +57,9 @@ class RoketpunchSpider(scrapy.Spider):
             for index,job_card_href in enumerate(job_card_hrefs) :
                 check_overlap,result = sql_db.check_data('job_detail',self.main_url+job_card_href)
                 if check_overlap :
-                    if (result['title'] != job_card_titles[index] 
-                        or result['company_name'] != job_card_company):
-                        sql_db.insert_center(result.keys(),result.values())
+                    if ((result['title'] != job_card_titles[index] or result['company_name'] != remove_blank_all(job_card_company))
+                        or (datetime.today()-result['crawl_date']) >= timedelta(days=14)) :
+                        sql_db.insert_center(result)
                         sql_db.delete_data('job_detail',result['id'])
                         yield scrapy.Request(url=self.main_url+job_card_href,
                                         callback=self.parse_job_detail,
