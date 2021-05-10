@@ -17,7 +17,7 @@ class MySQL :
         self.data_center = pymysql.connect(
                                 host = '15.164.140.140',
                                 user = KEY['user'],
-                                passwd = KEY['password'],
+                                passwd = 'root',
                                 db = 'career-center',
                                 charset='utf8mb4'
                                 )

@@ -3,5 +3,5 @@
     "host" : "ec2-13-209-215-210.ap-northeast-2.compute.amazonaws.com",
     "port" : "3306",
     "user" : "root",
-    "password" : "root"
+    "password" : "wdt210309"
 }
