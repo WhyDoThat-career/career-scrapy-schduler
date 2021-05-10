@@ -11,6 +11,7 @@ from scrapy.utils.python import to_bytes
 from itemadapter import is_item, ItemAdapter
 
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 import time
 
 class SeleniumMiddleware:
@@ -70,8 +71,12 @@ class SeleniumMiddleware:
 
     def process_request(self, request, spider):
         self.driver.get(request.url)
-        if spider.name == 'wanted' :
+        if spider.name == 'wanted' and request.meta != {}:
             time.sleep(2)
+            some_tag = self.driver.find_element_by_class_name('_3h_f6TfissC0l7ogPcn7lY')
+            action = ActionChains(self.driver)
+            action.move_to_element(some_tag).perform()
+            time.sleep(1)
         else :
             time.sleep(1.2)
         if spider.name == 'wanted' and request.meta == {}:
