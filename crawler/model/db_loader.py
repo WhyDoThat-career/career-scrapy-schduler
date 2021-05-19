@@ -58,7 +58,7 @@ class MySQL :
         db.commit()
         
     def insert_center(self,items) :
-        with open('model/dtype_comapny.json') as file :
+        with open('model/dtype_map.json') as file :
             dtype_map = json.load(file)
         skey,sdata = self.dict_list2string(items,dtype_map)
         db = self.conn_data_center()
