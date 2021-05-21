@@ -55,7 +55,25 @@ class MySQL :
         db_cursor = db.cursor()
         sql_query = f"INSERT INTO {table} ({skey}) VALUES ({sdata})"
         db_cursor.execute(sql_query)
+        sql_query = f"SELECT id,skill_tag FROM {table} ORDER BY id DESC"
+        db_cursor.execute(sql_query)
+        rid_skill = db.fetchone()
+        insert_recruit_stack(rid_skill)
         db.commit()
+    
+    def insert_recruit_stack(self,data) :
+        tmp = []
+        sql = f"SELECT id,name FROM jobskill ORDER BY id ASC"
+        self.conn_mysqldb().execute(sql)
+        skill_list = [x[1] for x in self.conn_mysqldb().fetchall()]
+        for idx,tag in enumerate(data[1]) :
+            if tag is not None :
+                skill_ids = [skill_list.index(x.strip())+1 for x in tag.split(',') if x.strip() in skill_list]
+        for index,skill_id in enumerate(skill_ids) :
+            db_cursor = self.conn_data_center()
+            sql_query = f"INSERT INTO jobskill (recruit_id,skill_id) VALUES ({data[0]},{skill_id})"
+            db_cursor.execute(sql_query)
+            db_cursor.commit()
         
     def insert_center(self,items) :
         with open('model/dtype_map.json') as file :
@@ -73,6 +91,12 @@ class MySQL :
         sql_query = f"DELETE FROM {table} WHERE `id` = {id}"
         db_cursor.execute(sql_query)
         db.commit()
+        
+        dc_db = self.conn_mysqldb()
+        dc_db_cursor = dc_db.cursor()
+        sql_query = f"DELETE FROM recruit_stack WHERE `recruit_id` = {id}"
+        dc_db_cursor.execute(sql_query)
+        dc_db.commit()
 
     def check_data(self,table,href) :
         db = self.conn_mysqldb()
