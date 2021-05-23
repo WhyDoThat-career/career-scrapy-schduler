@@ -74,7 +74,7 @@ class MySQL :
             db_cursor = self.conn_data_center().cursor()
             sql_query = f"INSERT INTO recruit_stack (recruit_id,skill_id) VALUES ({data[0]},{skill_id})"
             db_cursor.execute(sql_query)
-            db_cursor.commit()
+            self.conn_data_center().commit()
         
     def insert_center(self,items) :
         with open('model/dtype_map.json') as file :
