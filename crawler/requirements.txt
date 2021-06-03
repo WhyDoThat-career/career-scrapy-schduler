@@ -7,3 +7,4 @@ konlpy
 tensorflow
 tensorflow-datasets
 schedule
+tqdm

@@ -17,6 +17,8 @@ class ProgrammersSpider(scrapy.Spider):
     
     def table2dict(self,labels,contents) :
         table_dict = dict()
+        labels = [x.strip() for x in labels]
+        contents = [x.strip() for x in contents]
         if '주요 서비스' in labels and remove_blank_all(contents[labels.index('주요 서비스')]) == '' :
             del contents[labels.index('주요 서비스')]
         if len(labels) != len(contents) :
@@ -88,8 +90,7 @@ class ProgrammersSpider(scrapy.Spider):
     def parse_detail(self, response) :
         doc = CrawlerItem()
         print(response.meta['job_card_title'],response.meta['job_card_company'])
-        if response.meta['job_card_company'] == '' :
-            response.meta['job_card_company'] = response.css('#app > div > div > header > div.header-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 > h4:nth-child(2)::text').get()
+        response.meta['job_card_company'] = response.css('#app > div > div > header > div.header-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 > h4:nth-child(2)::text').get()
 
         detail_tag = response.css('#app > div > div > div > div.content-body.col-item.col-xs-12.col-sm-12.col-md-12.col-lg-8 \
                                     > section.section-stacks > table > tbody > tr > td > code::text').getall()
