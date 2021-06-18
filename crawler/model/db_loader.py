@@ -99,10 +99,10 @@ class MySQL :
         dc_db_cursor.execute(sql_query)
         dc_db.commit()
 
-    def check_data(self,table,href) :
+    def check_data(self,table,search,filtering='href') :
         db = self.conn_mysqldb()
         db_cursor = db.cursor(DictCursor)
-        sql_query = f"SELECT * FROM {table} WHERE href = \'{href}\'"
+        sql_query = f"SELECT * FROM {table} WHERE {filtering} = \'{search}\'"
         db_cursor.execute(sql_query)
         result = db_cursor.fetchone()
         print(result)

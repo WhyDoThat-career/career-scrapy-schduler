@@ -128,7 +128,7 @@ class ProgrammersSpider(scrapy.Spider):
         doc['career'] = table_dict['경력여부']
         doc['deadline'] = control_deadline_programmers(table_dict['기간'])
         
-        doc['company_name'] = response.meta['job_card_company']
+        doc['company_name'] = remove_blank_all(response.meta['job_card_company'])
         doc['company_address'] = table_dict['근무 위치']
         doc['crawl_date'] = str(datetime.now())
         doc['big_company'] = 0

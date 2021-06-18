@@ -3,6 +3,7 @@ from crawler.items import JobplanetItem
 from datetime import datetime
 from crawler import sql_db
 from crawler.data_controller import arr2str,control_deadline
+from tqdm import tqdm
 
 
 class JobplanetSpider(scrapy.Spider):
@@ -22,8 +23,12 @@ class JobplanetSpider(scrapy.Spider):
 
     def start_requests(self):
         company_names = self.get_company_names_from_DB()
-        for company_name in company_names:
-            yield scrapy.Request(url=self.main_url+f'/search?query={company_name}',callback=self.parse_search_page,meta={'company_name':company_name})
+        for company_name in tqdm(company_names):
+            check_overlap,result = sql_db.check_data('company_info',company_name,filtering='name')
+            if check_overlap :
+                pass
+            else :
+                yield scrapy.Request(url=self.main_url+f'/search?query={company_name}',callback=self.parse_search_page,meta={'company_name':company_name})
             
     def parse_search_page(self,response) :
         company_key = response.css('#mainContents > div > div > div.result_company_card > div.is_company_card > div > a::attr(href)').get().split('/')[2] #첫번째가 가장 정확한 결과
